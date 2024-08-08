@@ -27,12 +27,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.quanlynhansu.models.PieChartData
+import com.example.quanlynhansu.ui.PieChart
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticalEmployeeScreen(
     backInfoScreen: () -> Unit
 ) {
+    var getPieChartData = listOf(
+        PieChartData("18 - 25", 20f),
+        PieChartData("26 - 35", 15f),
+        PieChartData("36 - 45", 40f),
+        PieChartData("Trên 45", 25f)
+    )
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -74,6 +83,8 @@ fun StatisticalEmployeeScreen(
             }
 
             Spacer(modifier = Modifier.height(20.dp))
+
+            PieChart("Nhân sự theo độ tuổi", getPieChartData)
         }
     }
 }

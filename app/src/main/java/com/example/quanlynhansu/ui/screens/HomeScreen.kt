@@ -45,10 +45,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,8 +64,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.quanlynhansu.R
+import com.example.quanlynhansu.firebase.getEmployeeQuantity
 import com.example.quanlynhansu.ui.AlertDialogComponent
 import com.example.quanlynhansu.ui.TextComponent
+import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -78,6 +82,17 @@ fun HomeScreen(
     showInfoScreen: (userID: String, role: String) -> Unit
 ) {
     val context = LocalContext.current
+
+    val coroutineScope = rememberCoroutineScope()
+
+    var employeeQuantity by remember {
+        mutableStateOf(0)
+    }
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            employeeQuantity = getEmployeeQuantity()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -675,7 +690,7 @@ fun HomeScreen(
                                     Spacer(modifier = Modifier.height(4.dp))
 
                                     Text(
-                                        text = "24",
+                                        text = "$employeeQuantity",
                                         fontSize = 22.sp,
                                         color = Color(0xffea9010),
                                         fontWeight = FontWeight.W400,
@@ -749,7 +764,7 @@ fun HomeScreen(
                                     Spacer(modifier = Modifier.height(4.dp))
 
                                     Text(
-                                        text = "18",
+                                        text = "5",
                                         fontSize = 22.sp,
                                         color = Color(0xffea9010),
                                         fontWeight = FontWeight.W400,

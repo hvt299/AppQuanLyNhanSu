@@ -99,3 +99,13 @@ suspend fun getAllEmployee(): List<Employee> {
     }
     return employeeList
 }
+
+suspend fun getEmployeeQuantity(): Int {
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    return try {
+        val querySnapshot = db.collection("Employee").get().await()
+        querySnapshot.size()
+    } catch (e: Exception) {
+        0
+    }
+}
