@@ -5,6 +5,8 @@ import com.example.quanlynhansu.models.Employee
 import com.example.quanlynhansu.models.User
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @SuppressLint("SuspiciousIndentation")
 suspend fun getUserByUserID(userID: String): User {
@@ -108,4 +110,28 @@ suspend fun getEmployeeQuantity(): Int {
     } catch (e: Exception) {
         0
     }
+}
+
+suspend fun getEmployeeBaseOnAge(): List<Int> {
+    val df = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val employeeBaseOnAge = MutableList(4) { 0 }
+    val db = FirebaseFirestore.getInstance()
+    return try {
+        val querySnapshot = db.collection("Employee").get().await()
+
+        for (document in querySnapshot.documents) {
+            val employee = document.toObject(Employee::class.java)
+            employee?.let {
+                val age = LocalDate.now().year - LocalDate.parse(it.dateOfBirth, df).year
+                when {
+                    age > 45 -> employeeBaseOnAge[3]++
+                    age in 36..45 -> employeeBaseOnAge[2]++
+                    age in 26..35 -> employeeBaseOnAge[1]++
+                    age in 18..25 -> employeeBaseOnAge[0]++
+                    else -> {}
+                }
+            }
+        }
+        employeeBaseOnAge
+    } catch (e: Exception) {employeeBaseOnAge}
 }
