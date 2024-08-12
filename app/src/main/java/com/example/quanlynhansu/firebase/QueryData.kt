@@ -6,10 +6,10 @@ import com.example.quanlynhansu.models.Salary
 import com.example.quanlynhansu.models.User
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 // User Query
@@ -94,6 +94,45 @@ suspend fun getEmployeeByUserID(userID: String): Employee {
     return updatedEmployee
 }
 
+suspend fun getEmployeeByEmployeeID(employeeID: String): Employee {
+    var employee = Employee()
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    try {
+        val querySnapshot = db.collection("Employee")
+            .whereEqualTo("employeeID", employeeID)
+            .get()
+            .await()
+
+        if (!querySnapshot.isEmpty) {
+            val document = querySnapshot.documents.firstOrNull()
+            val employeeID = document?.id as String
+            val employeeData = document.data
+            val userID = employeeData?.get("userID") as String
+            val fullname = employeeData["fullname"] as String
+            val gender = employeeData["gender"] as String
+            val dateOfBirth = employeeData["dateOfBirth"] as Timestamp
+            val idCard = employeeData["idCard"] as String
+            val placeOfBirth = employeeData["placeOfBirth"] as String
+            val placeOfResidence = employeeData["placeOfResidence"] as String
+            val cityOrProvince = employeeData["cityOrProvince"] as String
+            val district = employeeData["district"] as String
+            val wardOrCommune = employeeData["wardOrCommune"] as String
+            val phoneNumber = employeeData["phoneNumber"] as String
+            val emailAddress = employeeData["emailAddress"] as String
+            val department = employeeData["department"] as String
+            val position = employeeData["position"] as String
+            val startDate = employeeData["startDate"] as Timestamp
+            val endDate = employeeData["endDate"] as Timestamp
+            employee = Employee(
+                employeeID, userID, fullname, gender, dateOfBirth,
+                idCard, placeOfBirth, placeOfResidence, cityOrProvince,
+                district, wardOrCommune, phoneNumber, emailAddress,
+                department, position, startDate, endDate)
+        }
+    } catch (_: Exception) {}
+    return employee
+}
+
 suspend fun getAllEmployee(): List<Employee> {
     val employeeList: MutableList<Employee> = mutableListOf()
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -175,26 +214,39 @@ suspend fun getEmployeeBaseOnStartDate(): List<Int> {
 }
 
 // Salary Query
-suspend fun getSalaryByEmployeeID(employeeID: String): Salary {
-    var mysalary = Salary("", Timestamp.now(), Timestamp.now(), 0)
-
+suspend fun getSalaryByEmployeeID(employeeID: String): List<Salary> {
+    val salaryList: MutableList<Salary> = mutableListOf()
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-    try {
-        val querySnapshot = db.collection("Salary")
-            .whereEqualTo("employeeID", employeeID)
-            .get()
-            .await()
+    val querySnapshot = db.collection("Salary")
+        .whereEqualTo("employeeID", employeeID)
+        .orderBy("fromDate", Query.Direction.DESCENDING)
+        .get()
+        .await()
 
-        if (!querySnapshot.isEmpty) {
-            val document = querySnapshot.documents.firstOrNull()
-            val userData = document?.data
-            val fromDate = userData?.get("fromDate") as Timestamp
-            val toDate = userData["toDate"] as Timestamp
-            val salary = userData["salary"] as Int
-            mysalary = Salary(employeeID, fromDate, toDate, salary)
+    for (document in querySnapshot.documents) {
+        val salary = document.toObject(Salary::class.java)
+        salary?.let {
+            salaryList.add(it)
         }
-    } catch (_: Exception) {}
-    return mysalary
+    }
+    return salaryList
+}
+
+suspend fun getAllSalary(): List<Salary> {
+    val salaryList: MutableList<Salary> = mutableListOf()
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    val querySnapshot = db.collection("Salary")
+        .orderBy("fromDate", Query.Direction.DESCENDING)
+        .get()
+        .await()
+
+    for (document in querySnapshot.documents) {
+        val salary = document.toObject(Salary::class.java)
+        salary?.let {
+            salaryList.add(it)
+        }
+    }
+    return salaryList
 }
 
 // CheckTime Query

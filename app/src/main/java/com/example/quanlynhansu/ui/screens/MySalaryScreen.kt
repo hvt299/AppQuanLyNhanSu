@@ -1,9 +1,5 @@
 package com.example.quanlynhansu.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -22,13 +18,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,19 +33,30 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.quanlynhansu.R
+import com.example.quanlynhansu.firebase.getEmployeeByUserID
+import com.example.quanlynhansu.firebase.getSalaryByEmployeeID
 import com.example.quanlynhansu.models.Employee
+import com.example.quanlynhansu.models.Salary
+import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -61,11 +64,30 @@ fun MySalaryScreen(
     userID: String,
     backSalaryScreen: () -> Unit
 ) {
-//    var employeeList by remember {
-//        mutableStateOf<List<Employee>>(emptyList())
-//    }
+    val df1 = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val nf = NumberFormat.getInstance(Locale.US)
 
-    var salaryList = listOf("1", "2", "3", "4", "5")
+    var employee by remember {
+        mutableStateOf(Employee())
+    }
+
+    var fullname by remember {
+        mutableStateOf("")
+    }
+
+    var salaryList by remember {
+        mutableStateOf<List<Salary>>(emptyList())
+    }
+
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            employee = getEmployeeByUserID(userID)
+            fullname = employee.fullname
+            salaryList = getSalaryByEmployeeID(employee.employeeID)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -164,7 +186,7 @@ fun MySalaryScreen(
                                                 )
                                             ) {
                                                 Icon(
-                                                    imageVector = Icons.Default.Person,
+                                                    painter = painterResource(id = R.drawable.baseline_attach_money_24),
                                                     contentDescription = null,
                                                     modifier = Modifier.size(28.dp)
                                                 )
@@ -177,7 +199,7 @@ fun MySalaryScreen(
                                                 modifier = Modifier.fillMaxHeight()
                                             ) {
                                                 Text(
-                                                    text = "Tên",
+                                                    text = fullname,
                                                     fontSize = 16.sp,
                                                     color = Color(0xffea9010),
                                                     fontWeight = FontWeight.W500,
@@ -187,7 +209,7 @@ fun MySalaryScreen(
                                                 Spacer(modifier = Modifier.height(4.dp))
 
                                                 Text(
-                                                    text = "Từ ngày $item đến ngày $item",
+                                                    text = "${df1.format(item.fromDate.toDate())} - ${df1.format(item.toDate.toDate())}",
                                                     fontSize = 14.sp,
                                                     color = Color.Black,
                                                     fontWeight = FontWeight.W300,
@@ -197,10 +219,10 @@ fun MySalaryScreen(
                                                 Spacer(modifier = Modifier.height(4.dp))
 
                                                 Text(
-                                                    text = "Mức lương $item VNĐ",
+                                                    text = "${nf.format(item.salary)} VNĐ",
                                                     fontSize = 14.sp,
                                                     color = Color.Black,
-                                                    fontWeight = FontWeight.W300,
+                                                    fontWeight = FontWeight.W400,
                                                     textAlign = TextAlign.Center
                                                 )
                                             }

@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -36,6 +34,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,13 +48,33 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.quanlynhansu.firebase.getAllSalary
+import com.example.quanlynhansu.firebase.getEmployeeByEmployeeID
+import com.example.quanlynhansu.models.Salary
+import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SalaryListScreen(
     backSalaryScreen: () -> Unit
 ) {
-    var salaryList = listOf("1", "2", "3", "4", "5")
+    val df1 = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val nf = NumberFormat.getInstance(Locale.US)
+
+    var salaryList by remember {
+        mutableStateOf<List<Salary>>(emptyList())
+    }
+
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            salaryList = getAllSalary()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -139,6 +163,14 @@ fun SalaryListScreen(
                                 ),
                                 elevation = CardDefaults.cardElevation(10.dp)
                             ) {
+                                var fullname by remember {
+                                    mutableStateOf("")
+                                }
+                                LaunchedEffect(Unit) {
+                                    coroutineScope.launch {
+                                        fullname = getEmployeeByEmployeeID(item.employeeID).fullname
+                                    }
+                                }
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -173,7 +205,7 @@ fun SalaryListScreen(
                                                 modifier = Modifier.fillMaxHeight()
                                             ) {
                                                 Text(
-                                                    text = "Tên",
+                                                    text = fullname,
                                                     fontSize = 16.sp,
                                                     color = Color(0xffea9010),
                                                     fontWeight = FontWeight.W500,
@@ -183,7 +215,7 @@ fun SalaryListScreen(
                                                 Spacer(modifier = Modifier.height(4.dp))
 
                                                 Text(
-                                                    text = "Từ ngày $item đến ngày $item",
+                                                    text = "${df1.format(item.fromDate.toDate())} - ${df1.format(item.toDate.toDate())}",
                                                     fontSize = 14.sp,
                                                     color = Color.Black,
                                                     fontWeight = FontWeight.W300,
@@ -193,10 +225,10 @@ fun SalaryListScreen(
                                                 Spacer(modifier = Modifier.height(4.dp))
 
                                                 Text(
-                                                    text = "Mức lương $item VNĐ",
+                                                    text = "${nf.format(item.salary)} VNĐ",
                                                     fontSize = 14.sp,
                                                     color = Color.Black,
-                                                    fontWeight = FontWeight.W300,
+                                                    fontWeight = FontWeight.W400,
                                                     textAlign = TextAlign.Center
                                                 )
                                             }
