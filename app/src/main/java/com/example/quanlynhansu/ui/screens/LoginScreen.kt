@@ -55,6 +55,7 @@ import com.example.quanlynhansu.ui.ImageComponent
 import com.example.quanlynhansu.ui.LoginViewModel
 import com.example.quanlynhansu.ui.TextComponent
 import com.example.quanlynhansu.ui.TextFieldComponent
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -81,14 +82,7 @@ fun LoginScreen(
             mutableStateOf(false)
         }
 
-        val currentDateTime: LocalDateTime = LocalDateTime.now()
-        val formattedCurrentDateTime by remember {
-            derivedStateOf {
-                DateTimeFormatter
-                    .ofPattern("dd/MM/yyyy HH:mm")
-                    .format(currentDateTime)
-            }
-        }
+        val currentDateTime: Timestamp = Timestamp.now()
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             ImageComponent(size = 180.dp, image = R.drawable.logo)
@@ -209,8 +203,8 @@ fun LoginScreen(
                         if (loginViewModel.uiState.value.usernameEntered.isNotEmpty()
                             && loginViewModel.uiState.value.passwordEntered.isNotEmpty()
                         ) {
-                            val updatedUser = User("", "", "", "", "", "", "", "")
-                            val updatedEmployee = Employee("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
+                            val updatedUser = User("", "", "", "", "", currentDateTime, currentDateTime, currentDateTime)
+                            val updatedEmployee = Employee("", "", "", "", currentDateTime, "", "", "", "", "", "", "", "", "", "", currentDateTime, currentDateTime)
 
                             val usernameEntered = loginViewModel.uiState.value.usernameEntered
                             val passwordEntered = encodeToMD5(loginViewModel.uiState.value.passwordEntered)
@@ -230,9 +224,9 @@ fun LoginScreen(
                                                 updatedUser.password = u?.password.toString()
                                                 updatedUser.status = u?.status.toString()
                                                 updatedUser.role = u?.role.toString()
-                                                updatedUser.lastLogin = formattedCurrentDateTime
-                                                updatedUser.createdAt = u?.createdAt.toString()
-                                                updatedUser.updatedAt = u?.updatedAt.toString()
+                                                updatedUser.lastLogin = currentDateTime
+                                                updatedUser.createdAt = u?.createdAt!!
+                                                updatedUser.updatedAt = u?.updatedAt!!
                                                 userList.add(u)
                                                 break
                                             }
@@ -252,7 +246,7 @@ fun LoginScreen(
                                                                 updatedEmployee.userID = updatedUser.userID
                                                                 updatedEmployee.fullname = e?.fullname.toString()
                                                                 updatedEmployee.gender = e?.gender.toString()
-                                                                updatedEmployee.dateOfBirth = e?.dateOfBirth.toString()
+                                                                updatedEmployee.dateOfBirth = e?.dateOfBirth!!
                                                                 updatedEmployee.idCard = e?.idCard.toString()
                                                                 updatedEmployee.placeOfBirth = e?.placeOfBirth.toString()
                                                                 updatedEmployee.placeOfResidence = e?.placeOfResidence.toString()
@@ -263,8 +257,8 @@ fun LoginScreen(
                                                                 updatedEmployee.emailAddress = e?.emailAddress.toString()
                                                                 updatedEmployee.department = e?.department.toString()
                                                                 updatedEmployee.position = e?.position.toString()
-                                                                updatedEmployee.startDate = e?.startDate.toString()
-                                                                updatedEmployee.endDate = e?.endDate.toString()
+                                                                updatedEmployee.startDate = e?.startDate!!
+                                                                updatedEmployee.endDate = e?.endDate!!
 
                                                                 employeeList.add(e)
                                                                 break

@@ -1,6 +1,5 @@
 package com.example.quanlynhansu.ui.screens
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -69,6 +68,7 @@ import com.example.quanlynhansu.models.Employee
 import com.example.quanlynhansu.models.User
 import com.example.quanlynhansu.ui.ButtonComponent
 import com.example.quanlynhansu.ui.UpdateProfileViewModel
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.vanpra.composematerialdialogs.MaterialDialog
@@ -76,9 +76,11 @@ import com.vanpra.composematerialdialogs.datetime.date.DatePickerDefaults
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,6 +98,8 @@ fun UpdateProfileScreen(
         mutableStateOf(false)
     }
     val df = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val df1 = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val df2 = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
     var username by remember {
         mutableStateOf("")
@@ -118,7 +122,7 @@ fun UpdateProfileScreen(
                 .format(LocalDateTime.now())
         )
     }
-    var updatedAt by remember {
+    val updatedAt by remember {
         mutableStateOf(
             DateTimeFormatter
             .ofPattern("dd/MM/yyyy HH:mm")
@@ -215,11 +219,11 @@ fun UpdateProfileScreen(
             password = user.password
             updateProfileViewModel.uiState.value.passwordEntered = user.password
             if (userID != "0") {
-                lastLogin = user.lastLogin
-                createdAt = user.createdAt
-                pickedDateOfBirth = LocalDate.parse(employee.dateOfBirth, df)
-                pickedStartDate = LocalDate.parse(employee.startDate, df)
-                pickedEndDate = LocalDate.parse(employee.endDate, df)
+                lastLogin = df2.format(user.lastLogin.toDate())
+                createdAt = df2.format(user.createdAt.toDate())
+                pickedDateOfBirth = LocalDate.parse(df1.format(employee.dateOfBirth.toDate()), df)
+                pickedStartDate = LocalDate.parse(df1.format(employee.startDate.toDate()), df)
+                pickedEndDate = LocalDate.parse(df1.format(employee.endDate.toDate()), df)
             }
             employeeID = employee.employeeID
 
@@ -390,7 +394,7 @@ fun UpdateProfileScreen(
                 }
             ) {
                 datepicker(
-                    initialDate = LocalDate.now(),
+                    initialDate = pickedDateOfBirth,
                     title = "Chọn ngày sinh",
                     colors = DatePickerDefaults.colors(
                         headerBackgroundColor = Color(0xFFFD6229),
@@ -427,7 +431,7 @@ fun UpdateProfileScreen(
                 }
             ) {
                 datepicker(
-                    initialDate = LocalDate.now(),
+                    initialDate = pickedStartDate,
                     title = "Chọn ngày bắt đầu làm",
                     colors = DatePickerDefaults.colors(
                         headerBackgroundColor = Color(0xFFFD6229),
@@ -461,7 +465,7 @@ fun UpdateProfileScreen(
                 }
             ) {
                 datepicker(
-                    initialDate = LocalDate.now(),
+                    initialDate = pickedEndDate,
                     title = "Chọn ngày nghỉ việc",
                     colors = DatePickerDefaults.colors(
                         headerBackgroundColor = Color(0xFFFD6229),
@@ -1028,12 +1032,12 @@ fun UpdateProfileScreen(
                         onClick = {
                             if (updateProfileViewModel.uiState.value.fullnameEntered.isNotEmpty()) {
                                 val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-                                var user = User(userID, username, password, statusAccountSelected, roleAccountSelected, lastLogin, createdAt, updatedAt)
+                                val user = User(userID, username, password, statusAccountSelected, roleAccountSelected, Timestamp(df2.parse(lastLogin)), Timestamp(df2.parse(createdAt)), Timestamp(df2.parse(updatedAt)))
                                 val employee = Employee(
-                                    employeeID, userID, updateProfileViewModel.uiState.value.fullnameEntered, genderSelected, formattedDateOfBirth,
+                                    employeeID, userID, updateProfileViewModel.uiState.value.fullnameEntered, genderSelected, Timestamp(df1.parse(formattedDateOfBirth)),
                                     updateProfileViewModel.uiState.value.idcardEntered, updateProfileViewModel.uiState.value.placeofbirthEntered, updateProfileViewModel.uiState.value.placeofresidenceEntered, updateProfileViewModel.uiState.value.cityorprovinceEntered,
                                     updateProfileViewModel.uiState.value.districtEntered, updateProfileViewModel.uiState.value.wardorcommuneEntered, updateProfileViewModel.uiState.value.phonenumberEntered, updateProfileViewModel.uiState.value.emailaddressEntered,
-                                    departmentSelected, positionSelected, formattedStartDate, formattedEndDate)
+                                    departmentSelected, positionSelected, Timestamp(df1.parse(formattedStartDate)), Timestamp(df1.parse(formattedEndDate)))
                                 db.collection("Employee").document(employeeID).set(employee)
                                     .addOnSuccessListener {
                                         db.collection("User").document(userID).set(user)
@@ -1559,14 +1563,14 @@ fun UpdateProfileScreen(
                         onClick = {
                             if (updateProfileViewModel.uiState.value.fullnameEntered.isNotEmpty()) {
                                 val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-                                var user = User(userID, updateProfileViewModel.uiState.value.usernameEntered,
+                                val user = User(userID, updateProfileViewModel.uiState.value.usernameEntered,
                                     updateProfileViewModel.uiState.value.passwordEntered, statusAccountSelected,
-                                    roleAccountSelected, lastLogin, createdAt, updatedAt)
+                                    roleAccountSelected, Timestamp(df2.parse(lastLogin)), Timestamp(df2.parse(createdAt)), Timestamp(df2.parse(updatedAt)))
                                 val employee = Employee(
-                                    employeeID, userID, updateProfileViewModel.uiState.value.fullnameEntered, genderSelected, formattedDateOfBirth,
+                                    employeeID, userID, updateProfileViewModel.uiState.value.fullnameEntered, genderSelected, Timestamp(df1.parse(formattedDateOfBirth)),
                                     updateProfileViewModel.uiState.value.idcardEntered, updateProfileViewModel.uiState.value.placeofbirthEntered, updateProfileViewModel.uiState.value.placeofresidenceEntered, updateProfileViewModel.uiState.value.cityorprovinceEntered,
                                     updateProfileViewModel.uiState.value.districtEntered, updateProfileViewModel.uiState.value.wardorcommuneEntered, updateProfileViewModel.uiState.value.phonenumberEntered, updateProfileViewModel.uiState.value.emailaddressEntered,
-                                    departmentSelected, positionSelected, formattedStartDate, formattedEndDate)
+                                    departmentSelected, positionSelected, Timestamp(df1.parse(formattedStartDate)), Timestamp(df1.parse(formattedEndDate)))
 
                                 if (userID == "0") {
                                     user.userID = user.username

@@ -33,7 +33,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.quanlynhansu.models.Employee
 import com.example.quanlynhansu.models.User
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +52,9 @@ fun ProfileScreen(
     val employeeList = remember {
         mutableStateListOf<Employee?>()
     }
+
+    val df1 = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val df2 = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
     db.collection("User").get()
@@ -84,9 +90,9 @@ fun ProfileScreen(
 
     var status = ""
     var role = ""
-    var lastLogin = ""
-    var createdAt = ""
-    var updatedAt = ""
+    var lastLogin = Timestamp.now()
+    var createdAt = Timestamp.now()
+    var updatedAt = Timestamp.now()
     for (user in userList) {
         if (user != null) {
             status = user.status
@@ -99,7 +105,7 @@ fun ProfileScreen(
     var employeeID = ""
     var fullname = ""
     var gender = ""
-    var dateOfBirth = ""
+    var dateOfBirth = Timestamp.now()
     var idCard = ""
     var placeOfBirth = ""
     var placeOfResidence = ""
@@ -110,8 +116,8 @@ fun ProfileScreen(
     var emailAddress = ""
     var department = ""
     var position = ""
-    var startDate = ""
-    var endDate = ""
+    var startDate = Timestamp.now()
+    var endDate = Timestamp.now()
     for (employee in employeeList) {
         if (employee != null) {
             employeeID = employee.employeeID
@@ -252,7 +258,7 @@ fun ProfileScreen(
                         fontWeight = FontWeight.W400
                     )
                     Text(
-                        text = dateOfBirth,
+                        text = df1.format(dateOfBirth.toDate()),
                         color = Color.Black,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.W300
@@ -505,7 +511,7 @@ fun ProfileScreen(
                         fontWeight = FontWeight.W400
                     )
                     Text(
-                        text = startDate,
+                        text = df1.format(startDate.toDate()),
                         color = Color.Black,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.W300
@@ -527,7 +533,7 @@ fun ProfileScreen(
                         fontWeight = FontWeight.W400
                     )
                     Text(
-                        text = endDate,
+                        text = df1.format(endDate.toDate()),
                         color = Color.Black,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.W300
@@ -626,7 +632,7 @@ fun ProfileScreen(
                         fontWeight = FontWeight.W400
                     )
                     Text(
-                        text = lastLogin,
+                        text = df2.format(lastLogin.toDate()),
                         color = Color.Black,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.W300
@@ -648,7 +654,7 @@ fun ProfileScreen(
                         fontWeight = FontWeight.W400
                     )
                     Text(
-                        text = createdAt,
+                        text = df2.format(createdAt.toDate()),
                         color = Color.Black,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.W300
@@ -670,7 +676,7 @@ fun ProfileScreen(
                         fontWeight = FontWeight.W400
                     )
                     Text(
-                        text = updatedAt,
+                        text = df2.format(updatedAt.toDate()),
                         color = Color.Black,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.W300

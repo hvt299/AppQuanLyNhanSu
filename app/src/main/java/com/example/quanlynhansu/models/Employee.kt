@@ -1,5 +1,6 @@
 package com.example.quanlynhansu.models
 
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.Exclude
 
 data class Employee(
@@ -7,7 +8,7 @@ data class Employee(
     var userID: String = "",
     var fullname: String = "",
     var gender: String? = "",
-    var dateOfBirth: String = "",
+    var dateOfBirth: Timestamp = Timestamp.now(),
     var idCard: String? = "",
     var placeOfBirth: String? = "",
     var placeOfResidence: String? = "",
@@ -18,6 +19,6 @@ data class Employee(
     var emailAddress: String? = "",
     var department: String? = "",
     var position: String = "",
-    var startDate: String = "",
-    var endDate: String = ""
+    var startDate: Timestamp = Timestamp.now(),
+    var endDate: Timestamp = Timestamp.now()
 )

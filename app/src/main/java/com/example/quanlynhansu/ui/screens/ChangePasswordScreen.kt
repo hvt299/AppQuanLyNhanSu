@@ -57,6 +57,7 @@ import com.example.quanlynhansu.models.User
 import com.example.quanlynhansu.ui.ButtonComponent
 import com.example.quanlynhansu.ui.ChangePasswordViewModel
 import com.example.quanlynhansu.ui.TextFieldComponent
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -76,14 +77,7 @@ fun ChangePasswordScreen(
         mutableStateOf(false)
     }
 
-    val currentDateTime: LocalDateTime = LocalDateTime.now()
-    val formattedCurrentDateTime by remember {
-        derivedStateOf {
-            DateTimeFormatter
-                .ofPattern("dd/MM/yyyy HH:mm")
-                .format(currentDateTime)
-        }
-    }
+    val currentDateTime: Timestamp = Timestamp.now()
 
     Scaffold(
         topBar = {
@@ -289,7 +283,7 @@ fun ChangePasswordScreen(
                             if (changePasswordViewModel.uiState.value.renewpasswordEntered
                                 == changePasswordViewModel.uiState.value.newpasswordEntered) {
 
-                                val updatedUser = User("", "", "", "", "", "", "", "")
+                                val updatedUser = User("", "", "", "", "", currentDateTime, currentDateTime, currentDateTime)
                                 val userList = mutableStateListOf<User?>()
                                 val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
@@ -309,9 +303,9 @@ fun ChangePasswordScreen(
                                                     updatedUser.password = encodeToMD5(changePasswordViewModel.uiState.value.newpasswordEntered)
                                                     updatedUser.status = u?.status.toString()
                                                     updatedUser.role = u?.role.toString()
-                                                    updatedUser.lastLogin = u?.lastLogin.toString()
-                                                    updatedUser.createdAt = u?.createdAt.toString()
-                                                    updatedUser.updatedAt = formattedCurrentDateTime
+                                                    updatedUser.lastLogin = u?.lastLogin!!
+                                                    updatedUser.createdAt = u?.createdAt!!
+                                                    updatedUser.updatedAt = currentDateTime
                                                     userList.add(u)
                                                     break
                                                 }

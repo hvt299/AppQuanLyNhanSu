@@ -1,5 +1,6 @@
 package com.example.quanlynhansu.models
 
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.Exclude
 
 data class User(
@@ -8,7 +9,7 @@ data class User(
     var password: String = "",
     var status: String = "",
     var role: String = "",
-    var lastLogin: String = "",
-    var createdAt: String = "",
-    var updatedAt: String = ""
+    var lastLogin: Timestamp = Timestamp.now(),
+    var createdAt: Timestamp = Timestamp.now(),
+    var updatedAt: Timestamp = Timestamp.now()
 )

@@ -56,11 +56,14 @@ import com.example.quanlynhansu.ui.ImageComponent
 import com.example.quanlynhansu.ui.RegisterViewModel
 import com.example.quanlynhansu.ui.TextComponent
 import com.example.quanlynhansu.ui.TextFieldComponent
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun RegisterScreen(
@@ -83,22 +86,7 @@ fun RegisterScreen(
             mutableStateOf(false)
         }
 
-        val currentDateTime: LocalDateTime = LocalDateTime.now()
-        val formattedCurrentDateTime by remember {
-            derivedStateOf {
-                DateTimeFormatter
-                    .ofPattern("dd/MM/yyyy HH:mm")
-                    .format(currentDateTime)
-            }
-        }
-        val currentDate: LocalDate = LocalDate.now()
-        val formattedCurrentDate by remember {
-            derivedStateOf {
-                DateTimeFormatter
-                    .ofPattern("dd/MM/yyyy")
-                    .format(currentDate)
-            }
-        }
+        val currentDateTime: Timestamp = Timestamp.now()
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             ImageComponent(size = 180.dp, image = R.drawable.logo)
@@ -327,8 +315,8 @@ fun RegisterScreen(
                                 val dbUser: CollectionReference = db.collection("User")
                                 val dbEmployee: CollectionReference = db.collection("Employee")
 
-                                val user = User("", username, password, "Đang hoạt động", "Nhân viên", formattedCurrentDateTime, formattedCurrentDateTime, formattedCurrentDateTime)
-                                val employee = Employee("", username, fullname, "", formattedCurrentDate, "", "", "", "", "", "", "", "", "", "Nhân viên", formattedCurrentDate, formattedCurrentDate)
+                                val user = User("", username, password, "Đang hoạt động", "Nhân viên", currentDateTime, currentDateTime, currentDateTime)
+                                val employee = Employee("", username, fullname, "", currentDateTime, "", "", "", "", "", "", "", "", "", "Nhân viên", currentDateTime, currentDateTime)
 
                                 var userList = mutableStateListOf<User?>()
 
