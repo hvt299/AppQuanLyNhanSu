@@ -99,7 +99,7 @@ fun StatisticalEmployeeScreen(
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 title = {
-                    Text(text = "Thông tin hồ sơ", fontSize = 18.sp, color = Color.White)
+                    Text(text = "Thống kê số lượng nhân sự", fontSize = 18.sp, color = Color.White)
                 },
                 navigationIcon = {
                     IconButton(onClick = {
@@ -134,6 +134,9 @@ fun StatisticalEmployeeScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             PieChart("Nhân sự theo độ tuổi", getPieChartData)
+            
+            Spacer(modifier = Modifier.height(20.dp))
+            
             BarChart(title = "Biến động nhân sự qua các năm", barEntriesList)
         }
     }

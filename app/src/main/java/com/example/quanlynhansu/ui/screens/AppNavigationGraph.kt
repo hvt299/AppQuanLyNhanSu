@@ -74,11 +74,67 @@ fun AppNavigationGraph(
                 backLoginScreen = {
                     navController.popBackStack(Routes.LOGIN_SCREEN, inclusive = false, saveState = true)
                 },
+                showSalaryScreen = { userID, role ->
+                    navController.navigate("${Routes.SALARY_SCREEN}/$userID/$role")
+                },
                 showInfoScreen = { userID, role ->
                     navController.navigate("${Routes.INFO_SCREEN}/$userID/$role")
                 },
                 showStatisticalEmployeeScreen = {
                     navController.navigate(Routes.STATISTICAL_EMPLOYEE_SCREEN)
+                }
+            )
+        }
+
+        composable("${Routes.SALARY_SCREEN}/{${Routes.USER_ID}}/{${Routes.ROLE}}",
+            arguments = listOf(
+                navArgument(name = Routes.USER_ID) {
+                    type = NavType.StringType
+                },
+                navArgument(name = Routes.ROLE) {
+                    type = NavType.StringType
+                })
+        ) {
+            val userID = it?.arguments?.getString(Routes.USER_ID)
+            val role = it?.arguments?.getString(Routes.ROLE)
+            requireNotNull(userID)
+            requireNotNull(role)
+            SalaryScreen(
+                userID = userID,
+                role = role,
+                backHomeScreen = {
+                    navController.popBackStack("${Routes.HOME_SCREEN}/{${Routes.USER_ID}}/{${Routes.FULL_NAME}}/{${Routes.POSITION}}/{${Routes.ROLE}}", inclusive = false, saveState = true)
+                },
+                showMySalaryScreen = { userID ->
+                    navController.navigate("${Routes.MY_SALARY_SCREEN}/$userID")
+                },
+                showSalaryListScreen = {
+                    navController.navigate(Routes.SALARY_LIST_SCREEN)
+                }
+            )
+        }
+
+        composable("${Routes.MY_SALARY_SCREEN}/{${Routes.USER_ID}}",
+            arguments = listOf(
+                navArgument(name = Routes.USER_ID) {
+                    type = NavType.StringType
+                })
+        ) {
+            val userID = it?.arguments?.getString(Routes.USER_ID)
+            requireNotNull(userID)
+            MySalaryScreen(
+                userID = userID,
+                backSalaryScreen = {
+                    navController.popBackStack("${Routes.SALARY_SCREEN}/{${Routes.USER_ID}}/{${Routes.ROLE}}", inclusive = false, saveState = true)
+                }
+            )
+        }
+
+        // admin
+        composable(Routes.SALARY_LIST_SCREEN) {
+            SalaryListScreen(
+                backSalaryScreen = {
+                    navController.popBackStack("${Routes.SALARY_SCREEN}/{${Routes.USER_ID}}/{${Routes.ROLE}}", inclusive = false, saveState = true)
                 }
             )
         }

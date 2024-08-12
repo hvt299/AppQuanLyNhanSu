@@ -79,6 +79,7 @@ fun HomeScreen(
     position: String,
     role: String,
     backLoginScreen: () -> Unit,
+    showSalaryScreen: (userID: String, role: String) -> Unit,
     showInfoScreen: (userID: String, role: String) -> Unit,
     showStatisticalEmployeeScreen: () -> Unit,
 ) {
@@ -438,7 +439,9 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.width(20.dp))
 
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            showSalaryScreen(userID, role)
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White,
                             contentColor = Color(0xFFFD6229)
@@ -454,7 +457,7 @@ fun HomeScreen(
                             modifier = Modifier.fillMaxSize()
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Search,
+                                painter = painterResource(id = R.drawable.baseline_attach_money_24),
                                 contentDescription = null,
                                 modifier = Modifier.size(30.dp),
                                 tint = Color(0xffea9010)
@@ -950,6 +953,7 @@ private fun HomeScreenPreview() {
         position = "position",
         role = "role",
         backLoginScreen = {},
+        showSalaryScreen = {userID, role -> },
         showInfoScreen = {userID, role -> },
         showStatisticalEmployeeScreen = {}
     )
