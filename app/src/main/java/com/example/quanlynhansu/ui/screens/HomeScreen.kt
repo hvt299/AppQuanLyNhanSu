@@ -79,7 +79,8 @@ fun HomeScreen(
     position: String,
     role: String,
     backLoginScreen: () -> Unit,
-    showInfoScreen: (userID: String, role: String) -> Unit
+    showInfoScreen: (userID: String, role: String) -> Unit,
+    showStatisticalEmployeeScreen: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -642,7 +643,9 @@ fun HomeScreen(
                     .padding(horizontal = 20.dp)
                 ) {
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            showStatisticalEmployeeScreen()
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White,
                             contentColor = Color.Black
@@ -716,7 +719,8 @@ fun HomeScreen(
                     .padding(horizontal = 20.dp)
                 ) {
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White,
                             contentColor = Color.Black
@@ -946,6 +950,7 @@ private fun HomeScreenPreview() {
         position = "position",
         role = "role",
         backLoginScreen = {},
-        showInfoScreen = {userID, role -> }
+        showInfoScreen = {userID, role -> },
+        showStatisticalEmployeeScreen = {}
     )
 }

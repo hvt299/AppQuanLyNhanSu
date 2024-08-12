@@ -4,12 +4,12 @@ import android.graphics.Typeface
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.EaseIn
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -56,15 +56,21 @@ import com.example.quanlynhansu.R
 import com.example.quanlynhansu.models.PieChartData
 import com.example.quanlynhansu.ui.theme.blueColor
 import com.example.quanlynhansu.ui.theme.greenColor
-import com.example.quanlynhansu.ui.theme.lightgrayColor
 import com.example.quanlynhansu.ui.theme.redColor
 import com.example.quanlynhansu.ui.theme.yellowColor
 import com.github.mikephil.charting.animation.Easing
+import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.Legend
+import com.github.mikephil.charting.components.LegendEntry
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.utils.ColorTemplate
+
 
 @Composable
 fun ImageComponent(
@@ -305,41 +311,23 @@ private fun AlertDialogComponentPreview() {
 // pie chart function on below line.
 @Composable
 fun PieChart(title: String, getPieChartData: List<PieChartData>) {
-    // on below line we are creating a column
-    // and specifying a modifier as max size.
-    Column(modifier = Modifier.fillMaxSize()) {
-        // on below line we are again creating a column
-        // with modifier and horizontal and vertical arrangement
+    Column(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // on below line we are creating a simple text
-            // and specifying a text as Web browser usage share
             Text(
                 text = title,
-
-                // on below line we are specifying style for our text
                 style = TextStyle.Default,
-
-                // on below line we are specifying font family.
 //                fontFamily = FontFamily().Default,
-
-                // on below line we are specifying font style
                 fontStyle = FontStyle.Normal,
-
-                // on below line we are specifying font size.
                 fontSize = 16.sp,
-
                 color = Color.Black,
                 fontWeight = FontWeight.W300
 
             )
 
-            // on below line we are creating a column and
-            // specifying the horizontal and vertical arrangement
-            // and specifying padding from all sides.
             Column(
                 modifier = Modifier
                     .padding(18.dp)
@@ -347,123 +335,136 @@ fun PieChart(title: String, getPieChartData: List<PieChartData>) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // on below line we are creating a cross fade and
-                // specifying target state as pie chart data the
-                // method we have created in Pie chart data class.
                 Crossfade(targetState = getPieChartData) { pieChartData ->
-                    // on below line we are creating an
-                    // android view for pie chart.
                     AndroidView(factory = { context ->
-                        // on below line we are creating a pie chart
-                        // and specifying layout params.
                         com.github.mikephil.charting.charts.PieChart(context).apply {
                             layoutParams = LinearLayout.LayoutParams(
-                                // on below line we are specifying layout
-                                // params as MATCH PARENT for height and width.
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                             )
-                            // on below line we are setting description
-                            // enables for our pie chart.
+
                             this.description.isEnabled = false
-
-                            // on below line we are setting draw hole
-                            // to false not to draw hole in pie chart
                             this.isDrawHoleEnabled = true
-
-                            // on below line we are enabling legend.
                             this.legend.isEnabled = true
-
-                            // on below line we are specifying
-                            // text size for our legend.
                             this.legend.textSize = 12F
-
-                            // on below line we are specifying
-                            // alignment for our legend.
                             this.legend.horizontalAlignment =
                                 Legend.LegendHorizontalAlignment.CENTER
-
-                            // on below line we are specifying entry label color as white.
                             this.setEntryLabelColor(resources.getColor(R.color.white))
-
                             this.animateY(1000, Easing.EaseInCubic)
                         }
                     },
-                        // on below line we are specifying modifier
-                        // for it and specifying padding to it.
                         modifier = Modifier
                             .wrapContentSize()
-                            .padding(5.dp), update = {
-                            // on below line we are calling update pie chart
-                            // method and passing pie chart and list of data.
+                            .padding(5.dp),
+                        update = {
                             updatePieChartWithData(it, pieChartData)
-                        })
+                        }
+                    )
                 }
             }
         }
     }
 }
 
-// on below line we are creating a update pie
-// chart function to update data in pie chart.
 fun updatePieChartWithData(
-    // on below line we are creating a variable
-    // for pie chart and data for our list of data.
     chart: PieChart,
     data: List<PieChartData>
 ) {
-    // on below line we are creating
-    // array list for the entries.
     val entries = ArrayList<PieEntry>()
 
-    // on below line we are running for loop for
-    // passing data from list into entries list.
     for (i in data.indices) {
         val item = data[i]
         entries.add(PieEntry(item.value ?: 0.toFloat(), item.dataName ?: ""))
     }
 
-    // on below line we are creating
-    // a variable for pie data set.
     val ds = PieDataSet(entries, "")
-
-    // on below line we are specifying color
-    // int the array list from colors.
     ds.colors = arrayListOf(
         yellowColor.toArgb(),
         greenColor.toArgb(),
         blueColor.toArgb(),
-        redColor.toArgb(),
+        redColor.toArgb()
     )
-    // on below line we are specifying position for value
     ds.yValuePosition = PieDataSet.ValuePosition.INSIDE_SLICE
-
-    // on below line we are specifying position for value inside the slice.
     ds.xValuePosition = PieDataSet.ValuePosition.INSIDE_SLICE
-
-    // on below line we are specifying
-    // slice space between two slices.
     ds.sliceSpace = 2f
-
-    // on below line we are specifying text color
     ds.valueTextColor = R.color.white
-
-    // on below line we are specifying
-    // text size for value.
     ds.valueTextSize = 12f
-
-    // on below line we are specifying type face as bold.
     ds.valueTypeface = Typeface.DEFAULT_BOLD
 
-    // on below line we are creating
-    // a variable for pie data
     val d = PieData(ds)
-
-    // on below line we are setting this
-    // pie data in chart data.
     chart.data = d
+    chart.invalidate()
+}
 
-    // on below line we are
-    // calling invalidate in chart.
+@Composable
+fun BarChart(title: String, getBarEntry: List<BarEntry>) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = title,
+                style = TextStyle.Default,
+//                fontFamily = FontFamily().Default,
+                fontStyle = FontStyle.Normal,
+                fontSize = 16.sp,
+                color = Color.Black,
+                fontWeight = FontWeight.W300
+            )
+
+            Column(
+                modifier = Modifier
+                    .padding(18.dp)
+                    .size(360.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Crossfade(targetState = getBarEntry) { barData ->
+                    AndroidView(factory = { context ->
+                        com.github.mikephil.charting.charts.BarChart(context).apply {
+                            layoutParams = LinearLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                            )
+
+                            this.description.isEnabled = false
+                            this.legend.isEnabled = true
+                            this.legend.textSize = 12F
+                            this.legend.horizontalAlignment =
+                                Legend.LegendHorizontalAlignment.CENTER
+                            this.animateY(2000)
+                        }
+                    },
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .padding(5.dp),
+                        update = {
+                            updateBarChartWithData(it, barData)
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+fun updateBarChartWithData(
+    chart: BarChart,
+    data: List<BarEntry>
+) {
+    var barDataSet = BarDataSet(data, "Nhân viên")
+    var barData = BarData(barDataSet)
+
+//    barDataSet.colors = arrayListOf(
+//        blueColor.toArgb()
+//    )
+    barDataSet.colors = ColorTemplate.COLORFUL_COLORS.toList()
+    barDataSet.valueTextColor = Color.Black.toArgb()
+    barDataSet.valueTextSize = 16f
+
+//    chart.setFitBars(true)
+    chart.data = barData
     chart.invalidate()
 }

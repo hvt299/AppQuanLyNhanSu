@@ -76,6 +76,9 @@ fun AppNavigationGraph(
                 },
                 showInfoScreen = { userID, role ->
                     navController.navigate("${Routes.INFO_SCREEN}/$userID/$role")
+                },
+                showStatisticalEmployeeScreen = {
+                    navController.navigate(Routes.STATISTICAL_EMPLOYEE_SCREEN)
                 }
             )
         }
@@ -166,8 +169,8 @@ fun AppNavigationGraph(
 
         composable(Routes.STATISTICAL_EMPLOYEE_SCREEN) {
             StatisticalEmployeeScreen(
-                backInfoScreen = {
-                    navController.popBackStack("${Routes.INFO_SCREEN}/{${Routes.USER_ID}}/{${Routes.ROLE}}", inclusive = false, saveState = true)
+                backPreviousScreen = {
+                    navController.popBackStack()
                 }
             )
         }

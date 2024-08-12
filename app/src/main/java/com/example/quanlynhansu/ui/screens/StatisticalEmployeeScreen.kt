@@ -1,6 +1,5 @@
 package com.example.quanlynhansu.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -35,22 +34,28 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.quanlynhansu.firebase.getEmployeeBaseOnAge
+import com.example.quanlynhansu.firebase.getEmployeeBaseOnStartDate
 import com.example.quanlynhansu.models.PieChartData
+import com.example.quanlynhansu.ui.BarChart
 import com.example.quanlynhansu.ui.PieChart
+import com.github.mikephil.charting.data.BarEntry
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticalEmployeeScreen(
-    backInfoScreen: () -> Unit
+    backPreviousScreen: () -> Unit
 ) {
     var employeeBaseOnAgeList by remember { mutableStateOf(listOf(0, 0, 0, 0)) }
+    var employeeBaseOnStartDateList by remember { mutableStateOf(listOf(0, 0, 0, 0, 0)) }
     var totalEmployeeBaseOnAge by remember { mutableStateOf(1) }
     var total1 by remember { mutableStateOf(0) }
     var total2 by remember { mutableStateOf(0) }
     var total3 by remember { mutableStateOf(0) }
     var total4 by remember { mutableStateOf(0) }
     var getPieChartData by remember { mutableStateOf(emptyList<PieChartData>()) }
+    var barEntriesList by remember { mutableStateOf(emptyList<BarEntry>()) }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -60,14 +65,15 @@ fun StatisticalEmployeeScreen(
             employeeBaseOnAgeList = employeeData
             totalEmployeeBaseOnAge = employeeData.sum()
 
-            // Tránh chia cho 0 khi tổng số nhân viên là 0
+            val employeeData2 = getEmployeeBaseOnStartDate()
+            employeeBaseOnStartDateList = employeeData2
+
             val safeTotal = if (totalEmployeeBaseOnAge == 0) 1 else totalEmployeeBaseOnAge
             total1 = (employeeBaseOnAgeList[0] * 100) / safeTotal
             total2 = (employeeBaseOnAgeList[1] * 100) / safeTotal
             total3 = (employeeBaseOnAgeList[2] * 100) / safeTotal
             total4 = (employeeBaseOnAgeList[3] * 100) / safeTotal
 
-            // Cập nhật lại dữ liệu pie chart
             getPieChartData = listOf(
                 PieChartData("18 - 25", total1.toFloat()),
                 PieChartData("26 - 35", total2.toFloat()),
@@ -75,10 +81,13 @@ fun StatisticalEmployeeScreen(
                 PieChartData("Trên 45", total4.toFloat())
             )
 
-            // Logging để kiểm tra dữ liệu
-            Log.d("DataDebug", "Employee Base On Age List: $employeeBaseOnAgeList")
-            Log.d("DataDebug", "Total Employee Base On Age: $totalEmployeeBaseOnAge")
-            Log.d("DataDebug", "Pie Chart Data: $getPieChartData")
+            barEntriesList = listOf(
+                BarEntry((LocalDate.now().year - 4).toFloat(), employeeBaseOnStartDateList[0].toFloat()),
+                BarEntry((LocalDate.now().year - 3).toFloat(), employeeBaseOnStartDateList[1].toFloat()),
+                BarEntry((LocalDate.now().year - 2).toFloat(), employeeBaseOnStartDateList[2].toFloat()),
+                BarEntry((LocalDate.now().year - 1).toFloat(), employeeBaseOnStartDateList[3].toFloat()),
+                BarEntry(LocalDate.now().year.toFloat(), employeeBaseOnStartDateList[4].toFloat())
+            )
         }
     }
 
@@ -94,7 +103,7 @@ fun StatisticalEmployeeScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        backInfoScreen()
+                        backPreviousScreen()
                     }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
                     }
@@ -125,6 +134,7 @@ fun StatisticalEmployeeScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             PieChart("Nhân sự theo độ tuổi", getPieChartData)
+            BarChart(title = "Biến động nhân sự qua các năm", barEntriesList)
         }
     }
 }
@@ -133,6 +143,6 @@ fun StatisticalEmployeeScreen(
 @Composable
 private fun StatisticalEmployeeScreenPreview() {
     StatisticalEmployeeScreen(
-        backInfoScreen = {}
+        backPreviousScreen = {}
     )
 }

@@ -135,3 +135,35 @@ suspend fun getEmployeeBaseOnAge(): List<Int> {
         employeeBaseOnAge
     } catch (e: Exception) {employeeBaseOnAge}
 }
+
+suspend fun getEmployeeBaseOnStartDate(): List<Int> {
+    val df = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val employeeBaseOnStartDate = MutableList(5) { 0 }
+    val db = FirebaseFirestore.getInstance()
+    return try {
+        val querySnapshot = db.collection("Employee").get().await()
+
+        for (document in querySnapshot.documents) {
+            val employee = document.toObject(Employee::class.java)
+            employee?.let {
+                val year = LocalDate.parse(it.startDate, df).year
+                if (year <= LocalDate.now().year) {
+                    employeeBaseOnStartDate[4]++
+                }
+                if (year <= LocalDate.now().year - 1) {
+                    employeeBaseOnStartDate[3]++
+                }
+                if (year <= LocalDate.now().year - 2) {
+                    employeeBaseOnStartDate[2]++
+                }
+                if (year <= LocalDate.now().year - 3) {
+                    employeeBaseOnStartDate[1]++
+                }
+                if (year <= LocalDate.now().year - 4) {
+                    employeeBaseOnStartDate[0]++
+                }
+            }
+        }
+        employeeBaseOnStartDate
+    } catch (e: Exception) {employeeBaseOnStartDate}
+}
