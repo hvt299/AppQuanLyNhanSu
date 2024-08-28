@@ -213,7 +213,6 @@ fun UpdateProfileScreen(
             val user = getUserByUserID(userID)
             val employee = getEmployeeByUserID(userID)
 
-
             username = user.username
             updateProfileViewModel.uiState.value.usernameEntered = user.username
             password = user.password

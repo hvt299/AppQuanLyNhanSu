@@ -1,5 +1,6 @@
 package com.example.quanlynhansu.ui.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -31,7 +32,6 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -64,9 +64,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.quanlynhansu.R
+import com.example.quanlynhansu.firebase.getCheckTimeQuantityByEmployeeID
+import com.example.quanlynhansu.firebase.getEmployeeByUserID
 import com.example.quanlynhansu.firebase.getEmployeeQuantity
+import com.example.quanlynhansu.firebase.getTaskQuantityBaseOnTaskStatus
+import com.example.quanlynhansu.firebase.getWorkingEmployeeQuantityBaseOnDate
+import com.example.quanlynhansu.models.CheckTime
 import com.example.quanlynhansu.ui.AlertDialogComponent
 import com.example.quanlynhansu.ui.TextComponent
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -80,6 +88,7 @@ fun HomeScreen(
     role: String,
     backLoginScreen: () -> Unit,
     showSalaryScreen: (userID: String, role: String) -> Unit,
+    showTaskScreen: (userID: String, role: String) -> Unit,
     showInfoScreen: (userID: String, role: String) -> Unit,
     showStatisticalEmployeeScreen: () -> Unit,
 ) {
@@ -87,12 +96,64 @@ fun HomeScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
+    var employeeID by remember {
+        mutableStateOf("")
+    }
     var employeeQuantity by remember {
         mutableStateOf(0)
     }
+    var taskInProgressQuantity by remember {
+        mutableStateOf(0)
+    }
+
+    val time: Timestamp = Timestamp.now()
+    var workingEmployeeQuantity by remember {
+        mutableStateOf(0)
+    }
+    var checkTimeQuantity by remember {
+        mutableStateOf(0)
+    }
+    var checkIn by remember {
+        mutableStateOf(false)
+    }
+    var titleCheckInOut by remember {
+        mutableStateOf("Vào ca")
+    }
+    var checkInOutBtnContainerColor by remember {
+        mutableStateOf(Color(0xFFFD6229))
+    }
+    var checkInOutBtnContentColor by remember {
+        mutableStateOf(Color.White)
+    }
+    var checkInOutIconContainerColor by remember {
+        mutableStateOf(Color.White)
+    }
+    var checkInOutIconContentColor by remember {
+        mutableStateOf(Color(0xFFEA9010))
+    }
+
     LaunchedEffect(Unit) {
         coroutineScope.launch {
             employeeQuantity = getEmployeeQuantity()
+            taskInProgressQuantity = getTaskQuantityBaseOnTaskStatus("Đang thực hiện")
+            workingEmployeeQuantity = getWorkingEmployeeQuantityBaseOnDate(time)
+            employeeID = getEmployeeByUserID(userID).employeeID
+            checkTimeQuantity = getCheckTimeQuantityByEmployeeID(employeeID, time)
+            if (checkTimeQuantity % 2 == 0) {
+                checkIn = false
+                titleCheckInOut = "Vào ca"
+                checkInOutBtnContainerColor = Color(0xFFFD6229)
+                checkInOutBtnContentColor = Color.White
+                checkInOutIconContainerColor = Color.White
+                checkInOutIconContentColor = Color(0xFFEA9010)
+            } else {
+                checkIn = true
+                titleCheckInOut = "Ra ca"
+                checkInOutBtnContainerColor = Color.White
+                checkInOutBtnContentColor = Color(0xFFFD6229)
+                checkInOutIconContainerColor = Color(0xFFEA9010)
+                checkInOutIconContentColor = Color.White
+            }
         }
     }
 
@@ -169,25 +230,6 @@ fun HomeScreen(
                 }
             }
 
-            var checkIn by remember {
-                mutableStateOf(false)
-            }
-            var titleCheckInOut by remember {
-                mutableStateOf("Vào ca")
-            }
-            var checkInOutBtnContainerColor by remember {
-                mutableStateOf(Color(0xFFFD6229))
-            }
-            var checkInOutBtnContentColor by remember {
-                mutableStateOf(Color.White)
-            }
-            var checkInOutIconContainerColor by remember {
-                mutableStateOf(Color.White)
-            }
-            var checkInOutIconContentColor by remember {
-                mutableStateOf(Color(0xFFEA9010))
-            }
-
             var openCheckInAlertDialog by remember {
                 mutableStateOf(false)
             }
@@ -205,14 +247,22 @@ fun HomeScreen(
                             openCheckInAlertDialog = false
                         },
                         onConfirmation = {
-                            checkIn = true
                             openCheckInAlertDialog = false
-                            checkInOutBtnContainerColor = Color.White
-                            checkInOutBtnContentColor = Color(0xFFFD6229)
-                            checkInOutIconContainerColor = Color(0xFFEA9010)
-                            checkInOutIconContentColor = Color.White
-                            titleCheckInOut = "Ra ca"
-                            Toast.makeText(context, "Bạn đã check-in thành công!", Toast.LENGTH_SHORT).show()
+                            val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+                            val dbCheckTime: CollectionReference = db.collection("CheckTime")
+                            dbCheckTime.add(CheckTime(employeeID, time, "Check-in"))
+                                .addOnSuccessListener {
+                                    checkIn = true
+                                    checkInOutBtnContainerColor = Color.White
+                                    checkInOutBtnContentColor = Color(0xFFFD6229)
+                                    checkInOutIconContainerColor = Color(0xFFEA9010)
+                                    checkInOutIconContentColor = Color.White
+                                    titleCheckInOut = "Ra ca"
+                                    Toast.makeText(context, "Bạn đã check-in thành công!", Toast.LENGTH_SHORT).show()
+                                }
+                                .addOnFailureListener {
+                                    Toast.makeText(context, "Có lỗi xảy ra (Lỗi: $it)", Toast.LENGTH_SHORT).show()
+                                }
                         },
                         dialogTitle = "Bạn chắc chắn muốn check-in hay không?",
                         dialogText = "Nếu nhấn vào OK, bạn sẽ không thể hoàn tác thao tác này được",
@@ -226,14 +276,22 @@ fun HomeScreen(
                             openCheckOutAlertDialog = false
                         },
                         onConfirmation = {
-                            checkIn = false
                             openCheckOutAlertDialog = false
-                            checkInOutBtnContainerColor = Color(0xFFFD6229)
-                            checkInOutBtnContentColor = Color.White
-                            checkInOutIconContainerColor = Color.White
-                            checkInOutIconContentColor = Color(0xFFEA9010)
-                            titleCheckInOut = "Vào ca"
-                            Toast.makeText(context, "Bạn đã check-out thành công!", Toast.LENGTH_SHORT).show()
+                            val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+                            val dbCheckTime: CollectionReference = db.collection("CheckTime")
+                            dbCheckTime.add(CheckTime(employeeID, time, "Check-out"))
+                                .addOnSuccessListener {
+                                    checkIn = false
+                                    checkInOutBtnContainerColor = Color(0xFFFD6229)
+                                    checkInOutBtnContentColor = Color.White
+                                    checkInOutIconContainerColor = Color.White
+                                    checkInOutIconContentColor = Color(0xFFEA9010)
+                                    titleCheckInOut = "Vào ca"
+                                    Toast.makeText(context, "Bạn đã check-out thành công!", Toast.LENGTH_SHORT).show()
+                                }
+                                .addOnFailureListener {
+                                    Toast.makeText(context, "Có lỗi xảy ra (Lỗi: $it)", Toast.LENGTH_SHORT).show()
+                                }
                         },
                         dialogTitle = "Bạn chắc chắn muốn check-out hay không?",
                         dialogText = "Nếu nhấn vào OK, bạn sẽ không thể hoàn tác thao tác này được",
@@ -488,7 +546,9 @@ fun HomeScreen(
                         .padding(end = 20.dp)
                 ) {
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            showTaskScreen(userID, role)
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White,
                             contentColor = Color(0xFFFD6229)
@@ -771,7 +831,7 @@ fun HomeScreen(
                                     Spacer(modifier = Modifier.height(4.dp))
 
                                     Text(
-                                        text = "5",
+                                        text = "${workingEmployeeQuantity}",
                                         fontSize = 22.sp,
                                         color = Color(0xffea9010),
                                         fontWeight = FontWeight.W400,
@@ -836,7 +896,7 @@ fun HomeScreen(
                                     modifier = Modifier.fillMaxHeight()
                                 ) {
                                     Text(
-                                        text = "Công việc hôm nay",
+                                        text = "Công việc đang thực hiện",
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.W300,
                                         textAlign = TextAlign.Center
@@ -845,7 +905,7 @@ fun HomeScreen(
                                     Spacer(modifier = Modifier.height(4.dp))
 
                                     Text(
-                                        text = "10",
+                                        text = "$taskInProgressQuantity",
                                         fontSize = 22.sp,
                                         color = Color(0xffea9010),
                                         fontWeight = FontWeight.W400,
@@ -954,6 +1014,7 @@ private fun HomeScreenPreview() {
         role = "role",
         backLoginScreen = {},
         showSalaryScreen = {userID, role -> },
+        showTaskScreen = {userID, role -> },
         showInfoScreen = {userID, role -> },
         showStatisticalEmployeeScreen = {}
     )

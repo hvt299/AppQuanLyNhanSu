@@ -77,6 +77,9 @@ fun AppNavigationGraph(
                 showSalaryScreen = { userID, role ->
                     navController.navigate("${Routes.SALARY_SCREEN}/$userID/$role")
                 },
+                showTaskScreen = { userID, role ->
+                    navController.navigate("${Routes.TASK_SCREEN}/$userID/$role")
+                },
                 showInfoScreen = { userID, role ->
                     navController.navigate("${Routes.INFO_SCREEN}/$userID/$role")
                 },
@@ -135,6 +138,47 @@ fun AppNavigationGraph(
             SalaryListScreen(
                 backSalaryScreen = {
                     navController.popBackStack("${Routes.SALARY_SCREEN}/{${Routes.USER_ID}}/{${Routes.ROLE}}", inclusive = false, saveState = true)
+                }
+            )
+        }
+
+        composable("${Routes.TASK_SCREEN}/{${Routes.USER_ID}}/{${Routes.ROLE}}",
+            arguments = listOf(
+                navArgument(name = Routes.USER_ID) {
+                    type = NavType.StringType
+                },
+                navArgument(name = Routes.ROLE) {
+                    type = NavType.StringType
+                })
+        ) {
+            val userID = it?.arguments?.getString(Routes.USER_ID)
+            val role = it?.arguments?.getString(Routes.ROLE)
+            requireNotNull(userID)
+            requireNotNull(role)
+            TaskScreen(
+                userID = userID,
+                role = role,
+                backHomeScreen = {
+                    navController.popBackStack("${Routes.HOME_SCREEN}/{${Routes.USER_ID}}/{${Routes.FULL_NAME}}/{${Routes.POSITION}}/{${Routes.ROLE}}", inclusive = false, saveState = true)
+                },
+                showTaskListScreen = { userID ->
+                    navController.navigate("${Routes.TASK_LIST_SCREEN}/$userID")
+                }
+            )
+        }
+
+        composable("${Routes.TASK_LIST_SCREEN}/{${Routes.USER_ID}}",
+            arguments = listOf(
+                navArgument(name = Routes.USER_ID) {
+                    type = NavType.StringType
+                })
+        ) {
+            val userID = it?.arguments?.getString(Routes.USER_ID)
+            requireNotNull(userID)
+            TaskListScreen(
+                userID = userID,
+                backTaskScreen = {
+                    navController.popBackStack("${Routes.TASK_SCREEN}/{${Routes.USER_ID}}/{${Routes.ROLE}}", inclusive = false, saveState = true)
                 }
             )
         }

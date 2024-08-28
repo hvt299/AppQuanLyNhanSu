@@ -1,15 +1,19 @@
 package com.example.quanlynhansu.firebase
 
 import android.annotation.SuppressLint
+import com.example.quanlynhansu.models.CheckTime
 import com.example.quanlynhansu.models.Employee
 import com.example.quanlynhansu.models.Salary
+import com.example.quanlynhansu.models.Task
 import com.example.quanlynhansu.models.User
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.Locale
 
 // User Query
@@ -250,6 +254,108 @@ suspend fun getAllSalary(): List<Salary> {
 }
 
 // CheckTime Query
+suspend fun getCheckTimeQuantityByEmployeeID(employeeID: String, time: Timestamp): Int {
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    return try {
+        var quantity = 0
+        val df1 = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val querySnapshot = db.collection("CheckTime")
+            .whereEqualTo("employeeID", employeeID)
+            .get()
+            .await()
 
+        for (document in querySnapshot.documents) {
+            val checkTime = document.toObject(CheckTime::class.java)
+            checkTime?.let {
+                if (df1.format(checkTime.checkTime.toDate()) == df1.format(time.toDate())) {
+                    quantity++
+                }
+            }
+        }
+        quantity
+    } catch (e: Exception) {
+        0
+    }
+}
+
+suspend fun getWorkingEmployeeQuantityBaseOnDate(time: Timestamp): Int {
+    val checkTimeList: MutableList<CheckTime> = mutableListOf()
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    return try {
+        var quantity = 0
+        val df1 = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val querySnapshot = db.collection("CheckTime")
+            .get()
+            .await()
+
+        for (document in querySnapshot.documents) {
+            val checkTime = document.toObject(CheckTime::class.java)
+            checkTime?.let {
+                var flag = true
+                for (i in checkTimeList) {
+                    if (checkTime.employeeID == i.employeeID
+                        || df1.format(checkTime.checkTime.toDate()) != df1.format(time.toDate())) {
+                        flag = false
+                        break
+                    }
+                }
+                if (flag) {
+                    checkTimeList.add(checkTime)
+                    quantity++
+                }
+            }
+        }
+        quantity
+    } catch (e: Exception) {
+        0
+    }
+}
 
 // Task Query
+suspend fun getTaskByEmployeeID(employeeID: String): List<Task> {
+    val taskList: MutableList<Task> = mutableListOf()
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    val querySnapshot = db.collection("Task")
+        .whereEqualTo("employeeID", employeeID)
+//        .orderBy("fromDate", Query.Direction.DESCENDING)
+        .get()
+        .await()
+
+    for (document in querySnapshot.documents) {
+        val task = document.toObject(Task::class.java)
+        task?.let {
+            taskList.add(it)
+        }
+    }
+    return taskList
+}
+
+suspend fun getAllTask(): List<Task> {
+    val taskList: MutableList<Task> = mutableListOf()
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    val querySnapshot = db.collection("Task")
+//        .orderBy("fromDate", Query.Direction.DESCENDING)
+        .get()
+        .await()
+
+    for (document in querySnapshot.documents) {
+        val task = document.toObject(Task::class.java)
+        task?.let {
+            taskList.add(it)
+        }
+    }
+    return taskList
+}
+
+suspend fun getTaskQuantityBaseOnTaskStatus(taskStatus: String): Int {
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    return try {
+        val querySnapshot = db.collection("Task")
+            .whereEqualTo("taskStatus", taskStatus)
+            .get()
+            .await()
+        querySnapshot.size()
+    } catch (e: Exception) {
+        0
+    }
+}
