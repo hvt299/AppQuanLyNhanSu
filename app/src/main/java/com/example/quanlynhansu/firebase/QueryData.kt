@@ -292,12 +292,15 @@ suspend fun getWorkingEmployeeQuantityBaseOnDate(time: Timestamp): Int {
             val checkTime = document.toObject(CheckTime::class.java)
             checkTime?.let {
                 var flag = true
-                for (i in checkTimeList) {
-                    if (checkTime.employeeID == i.employeeID
-                        || df1.format(checkTime.checkTime.toDate()) != df1.format(time.toDate())) {
-                        flag = false
-                        break
+                if (df1.format(checkTime.checkTime.toDate()) == df1.format(time.toDate())){
+                    for (i in checkTimeList) {
+                        if (checkTime.employeeID == i.employeeID) {
+                            flag = false
+                            break
+                        }
                     }
+                } else {
+                    flag = false
                 }
                 if (flag) {
                     checkTimeList.add(checkTime)

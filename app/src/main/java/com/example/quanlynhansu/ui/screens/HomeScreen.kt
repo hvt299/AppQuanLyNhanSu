@@ -1,6 +1,5 @@
 package com.example.quanlynhansu.ui.screens
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -87,6 +86,7 @@ fun HomeScreen(
     position: String,
     role: String,
     backLoginScreen: () -> Unit,
+    showCheckInOutScreen: (userID: String, role: String) -> Unit,
     showSalaryScreen: (userID: String, role: String) -> Unit,
     showTaskScreen: (userID: String, role: String) -> Unit,
     showInfoScreen: (userID: String, role: String) -> Unit,
@@ -457,7 +457,9 @@ fun HomeScreen(
 //                    Spacer(modifier = Modifier.width(20.dp))
 
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            showCheckInOutScreen(userID, role)
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White,
                             contentColor = Color(0xFFFD6229)
@@ -1013,6 +1015,7 @@ private fun HomeScreenPreview() {
         position = "position",
         role = "role",
         backLoginScreen = {},
+        showCheckInOutScreen = {userID, role -> },
         showSalaryScreen = {userID, role -> },
         showTaskScreen = {userID, role -> },
         showInfoScreen = {userID, role -> },

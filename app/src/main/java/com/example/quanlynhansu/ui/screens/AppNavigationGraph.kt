@@ -74,6 +74,9 @@ fun AppNavigationGraph(
                 backLoginScreen = {
                     navController.popBackStack(Routes.LOGIN_SCREEN, inclusive = false, saveState = true)
                 },
+                showCheckInOutScreen = { userID, role ->
+                    navController.navigate("${Routes.CHECK_IN_OUT_SCREEN}/$userID/$role")
+                },
                 showSalaryScreen = { userID, role ->
                     navController.navigate("${Routes.SALARY_SCREEN}/$userID/$role")
                 },
@@ -85,6 +88,28 @@ fun AppNavigationGraph(
                 },
                 showStatisticalEmployeeScreen = {
                     navController.navigate(Routes.STATISTICAL_EMPLOYEE_SCREEN)
+                }
+            )
+        }
+
+        composable("${Routes.CHECK_IN_OUT_SCREEN}/{${Routes.USER_ID}}/{${Routes.ROLE}}",
+            arguments = listOf(
+                navArgument(name = Routes.USER_ID) {
+                    type = NavType.StringType
+                },
+                navArgument(name = Routes.ROLE) {
+                    type = NavType.StringType
+                })
+        ) {
+            val userID = it?.arguments?.getString(Routes.USER_ID)
+            val role = it?.arguments?.getString(Routes.ROLE)
+            requireNotNull(userID)
+            requireNotNull(role)
+            CheckInOutScreen(
+                userID = userID,
+                role = role,
+                backHomeScreen = {
+                    navController.popBackStack("${Routes.HOME_SCREEN}/{${Routes.USER_ID}}/{${Routes.FULL_NAME}}/{${Routes.POSITION}}/{${Routes.ROLE}}", inclusive = false, saveState = true)
                 }
             )
         }
