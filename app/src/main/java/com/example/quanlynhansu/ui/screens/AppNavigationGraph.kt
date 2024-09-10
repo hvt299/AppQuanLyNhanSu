@@ -110,6 +110,37 @@ fun AppNavigationGraph(
                 role = role,
                 backHomeScreen = {
                     navController.popBackStack("${Routes.HOME_SCREEN}/{${Routes.USER_ID}}/{${Routes.FULL_NAME}}/{${Routes.POSITION}}/{${Routes.ROLE}}", inclusive = false, saveState = true)
+                },
+                showCheckInOutHistoryScreen = { userID ->
+                    navController.navigate("${Routes.CHECK_IN_OUT_HISTORY_SCREEN}/$userID")
+                },
+                showCheckInOutListScreen = {
+                    navController.navigate(Routes.CHECK_IN_OUT_LIST_SCREEN)
+                }
+            )
+        }
+
+        composable("${Routes.CHECK_IN_OUT_HISTORY_SCREEN}/{${Routes.USER_ID}}",
+            arguments = listOf(
+                navArgument(name = Routes.USER_ID) {
+                    type = NavType.StringType
+                })
+        ) {
+            val userID = it?.arguments?.getString(Routes.USER_ID)
+            requireNotNull(userID)
+            CheckInOutHistoryScreen(
+                userID = userID,
+                backCheckInOutScreen = {
+                    navController.popBackStack("${Routes.CHECK_IN_OUT_SCREEN}/{${Routes.USER_ID}}/{${Routes.ROLE}}", inclusive = false, saveState = true)
+                }
+            )
+        }
+
+        // admin
+        composable(Routes.CHECK_IN_OUT_LIST_SCREEN) {
+            CheckInOutListScreen(
+                backCheckInOutScreen = {
+                    navController.popBackStack("${Routes.CHECK_IN_OUT_SCREEN}/{${Routes.USER_ID}}/{${Routes.ROLE}}", inclusive = false, saveState = true)
                 }
             )
         }

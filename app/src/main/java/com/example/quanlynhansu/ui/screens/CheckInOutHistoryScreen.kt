@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,28 +42,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.quanlynhansu.R
+import com.example.quanlynhansu.firebase.getCheckTimeByEmployeeID
 import com.example.quanlynhansu.firebase.getEmployeeByUserID
-import com.example.quanlynhansu.firebase.getTaskByEmployeeID
+import com.example.quanlynhansu.models.CheckTime
 import com.example.quanlynhansu.models.Employee
-import com.example.quanlynhansu.models.Task
 import kotlinx.coroutines.launch
-import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun TaskListScreen(
+fun CheckInOutHistoryScreen(
     userID: String,
-    backTaskScreen: () -> Unit
+    backCheckInOutScreen: () -> Unit
 ) {
     val df1 = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-//    val nf = NumberFormat.getInstance(Locale.US)
 
     var employee by remember {
         mutableStateOf(Employee())
@@ -74,8 +73,8 @@ fun TaskListScreen(
         mutableStateOf("")
     }
 
-    var taskList by remember {
-        mutableStateOf<List<Task>>(emptyList())
+    var checkTimeList by remember {
+        mutableStateOf<List<CheckTime>>(emptyList())
     }
 
     val coroutineScope = rememberCoroutineScope()
@@ -84,7 +83,7 @@ fun TaskListScreen(
         coroutineScope.launch {
             employee = getEmployeeByUserID(userID)
             fullname = employee.fullname
-            taskList = getTaskByEmployeeID(employee.employeeID)
+            checkTimeList = getCheckTimeByEmployeeID(employee.employeeID)
         }
     }
 
@@ -96,11 +95,11 @@ fun TaskListScreen(
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 title = {
-                    Text(text = "Việc được giao", fontSize = 18.sp, color = Color.White)
+                    Text(text = "Lịch sử chấm công", fontSize = 18.sp, color = Color.White)
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        backTaskScreen()
+                        backCheckInOutScreen()
                     }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
                     }
@@ -118,7 +117,7 @@ fun TaskListScreen(
 
             Column {
                 Text(
-                    text = "DANH SÁCH CÔNG VIỆC ĐƯỢC GIAO",
+                    text = "LỊCH SỬ CHẤM CÔNG",
                     color = Color(0xffFD6229),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.W500,
@@ -132,7 +131,7 @@ fun TaskListScreen(
             Column(modifier = Modifier.fillMaxSize()) {
                 LazyColumn {
                     itemsIndexed(
-                        items = taskList,
+                        items = checkTimeList,
                         itemContent = { _, item ->
 //                            AnimatedVisibility(
 //                                visible = !deletedItem.contains(item),
@@ -144,7 +143,7 @@ fun TaskListScreen(
                                     .fillMaxWidth()
                                     .padding(20.dp)
                                     .wrapContentHeight()
-                                    .aspectRatio(2.5f)
+                                    .aspectRatio(3f)
                                     .combinedClickable(
                                         onClick = {
 //                                                showProfileScreen(item.userID)
@@ -185,7 +184,7 @@ fun TaskListScreen(
                                                 )
                                             ) {
                                                 Icon(
-                                                    imageVector = Icons.Default.List,
+                                                    painter = painterResource(id = R.drawable.baseline_fingerprint_24),
                                                     contentDescription = null,
                                                     modifier = Modifier.size(28.dp)
                                                 )
@@ -208,41 +207,20 @@ fun TaskListScreen(
                                                 Spacer(modifier = Modifier.height(4.dp))
 
                                                 Text(
-                                                    text = item.taskTitle,
-                                                    fontSize = 15.sp,
+                                                    text = df1.format(item.checkTime.toDate()),
+                                                    fontSize = 14.sp,
+                                                    color = Color.Black,
+                                                    fontWeight = FontWeight.W300,
+                                                    textAlign = TextAlign.Center
+                                                )
+
+                                                Spacer(modifier = Modifier.height(4.dp))
+
+                                                Text(
+                                                    text = item.checkType,
+                                                    fontSize = 14.sp,
                                                     color = Color.Black,
                                                     fontWeight = FontWeight.W400,
-                                                    textAlign = TextAlign.Center
-                                                )
-
-                                                Spacer(modifier = Modifier.height(4.dp))
-
-                                                Text(
-                                                    text = item.taskContent,
-                                                    fontSize = 14.sp,
-                                                    color = Color.Black,
-                                                    fontWeight = FontWeight.W300,
-                                                    textAlign = TextAlign.Center
-                                                )
-
-                                                Spacer(modifier = Modifier.height(4.dp))
-
-                                                Text(
-                                                    text = "${df1.format(item.taskStart.toDate())} - ${df1.format(item.taskEnd.toDate())}",
-                                                    fontSize = 14.sp,
-                                                    color = Color.Black,
-                                                    fontWeight = FontWeight.W300,
-                                                    textAlign = TextAlign.Center
-                                                )
-
-                                                Spacer(modifier = Modifier.height(4.dp))
-
-
-                                                Text(
-                                                    text = item.taskStatus,
-                                                    fontSize = 14.sp,
-                                                    color = if (item.taskStatus == "Đang thực hiện") Color(0xFFEA9010) else if (item.taskStatus == "Hoàn thành") Color.Green else Color.Red,
-                                                    fontWeight = FontWeight.W300,
                                                     textAlign = TextAlign.Center
                                                 )
                                             }
@@ -267,9 +245,9 @@ fun TaskListScreen(
 
 @Preview
 @Composable
-private fun TaskListScreenPreview() {
-    TaskListScreen(
+private fun CheckInOutHistoryScreenPreview() {
+    CheckInOutHistoryScreen(
         userID = "userID",
-        backTaskScreen = {}
+        backCheckInOutScreen = {}
     )
 }

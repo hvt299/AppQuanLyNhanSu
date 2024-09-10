@@ -50,7 +50,9 @@ import com.example.quanlynhansu.R
 fun CheckInOutScreen(
     userID: String,
     role: String,
-    backHomeScreen: () -> Unit
+    backHomeScreen: () -> Unit,
+    showCheckInOutHistoryScreen: (userID: String) -> Unit,
+    showCheckInOutListScreen: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -150,6 +152,7 @@ fun CheckInOutScreen(
                 ) {
                     Button(
                         onClick = {
+                            showCheckInOutHistoryScreen(userID)
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White,
@@ -166,7 +169,7 @@ fun CheckInOutScreen(
                             modifier = Modifier.fillMaxSize()
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Check,
+                                painter = painterResource(id = R.drawable.baseline_fingerprint_24),
                                 contentDescription = null,
                                 modifier = Modifier.size(30.dp),
                                 tint = Color(0xffea9010)
@@ -277,6 +280,7 @@ fun CheckInOutScreen(
                     ) {
                         Button(
                             onClick = {
+                                showCheckInOutListScreen()
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.White,
@@ -405,6 +409,8 @@ private fun CheckInOutScreenPreview() {
     CheckInOutScreen(
         userID = "userID",
         role = "role",
-        backHomeScreen = {}
+        backHomeScreen = {},
+        showCheckInOutHistoryScreen = {},
+        showCheckInOutListScreen = {}
     )
 }

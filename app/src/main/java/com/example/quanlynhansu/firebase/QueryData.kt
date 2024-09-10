@@ -9,11 +9,9 @@ import com.example.quanlynhansu.models.User
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.Locale
 
 // User Query
@@ -314,13 +312,51 @@ suspend fun getWorkingEmployeeQuantityBaseOnDate(time: Timestamp): Int {
     }
 }
 
+suspend fun getCheckTimeByEmployeeID(employeeID: String): List<CheckTime> {
+    val checkTimeList: MutableList<CheckTime> = mutableListOf()
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    val querySnapshot = db.collection("CheckTime")
+        .whereEqualTo("employeeID", employeeID)
+        .orderBy("checkTime", Query.Direction.DESCENDING)
+        .orderBy("checkType", Query.Direction.DESCENDING)
+        .get()
+        .await()
+
+    for (document in querySnapshot.documents) {
+        val checkTime = document.toObject(CheckTime::class.java)
+        checkTime?.let {
+            checkTimeList.add(it)
+        }
+    }
+    return checkTimeList
+}
+
+suspend fun getAllCheckTime(): List<CheckTime> {
+    val checkTimeList: MutableList<CheckTime> = mutableListOf()
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    val querySnapshot = db.collection("CheckTime")
+        .orderBy("checkTime", Query.Direction.DESCENDING)
+        .orderBy("checkType", Query.Direction.DESCENDING)
+        .get()
+        .await()
+
+    for (document in querySnapshot.documents) {
+        val checkTime = document.toObject(CheckTime::class.java)
+        checkTime?.let {
+            checkTimeList.add(it)
+        }
+    }
+    return checkTimeList
+}
+
 // Task Query
 suspend fun getTaskByEmployeeID(employeeID: String): List<Task> {
     val taskList: MutableList<Task> = mutableListOf()
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
     val querySnapshot = db.collection("Task")
         .whereEqualTo("employeeID", employeeID)
-//        .orderBy("fromDate", Query.Direction.DESCENDING)
+        .orderBy("taskStart", Query.Direction.DESCENDING)
+        .orderBy("taskEnd", Query.Direction.DESCENDING)
         .get()
         .await()
 
@@ -337,7 +373,8 @@ suspend fun getAllTask(): List<Task> {
     val taskList: MutableList<Task> = mutableListOf()
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
     val querySnapshot = db.collection("Task")
-//        .orderBy("fromDate", Query.Direction.DESCENDING)
+        .orderBy("taskStart", Query.Direction.DESCENDING)
+        .orderBy("taskEnd", Query.Direction.DESCENDING)
         .get()
         .await()
 
